@@ -20,16 +20,40 @@ import java.util.ArrayList;
 
 class FormaXls {
 
+  final int[]   f_jinx;  // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
+  final char[]  f_jtyp;  // типы колонок в Excel
+  final int     f_Noia; // размер массива шаблона
+
     /**
      * Конструктор
      *
      */
-    FormaXls() {
-
+    FormaXls()
+    {
+      // подготовка заданного шаблона преобразования в порядковые массивы индексов и типов колонок
+      String outIndex = R.OutIndex.replaceAll(" ",""); // шаблон колонок "i7;1;2;i3;4;f5;i7;i7;8"
+      String[] oia = outIndex.split(";");
+      int Noia = oia.length;
+      int[]  jinx = new int[Noia];   // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
+      char[] jtyp = new char[Noia];  // типы колонок в Excel
+      for(int ixls = 0; ixls < Noia; ixls++)  {
+        // ixls - колонка в Excel
+        String si = oia[ixls];
+        String mi = si.replaceAll("[^0-9]", "");
+        String mt = si.replaceAll("[0-9]", "");
+        if(mi.length() < 1) mi = "-1";  // неподходящее число заменим на -1 тюею игнор и пропуск колонки
+        if(mt.length() < 1) mt = "-";   // не целое и не действительное
+        jinx[ixls] = Integer.parseInt(mi);  // индекс в шаблоне (индекс в картеже из БД)
+        jtyp[ixls] = mt.charAt(0);          // тип колонки (i - целое, f|d - действительное)
+      }
+      // запомним результат работы
+      this.f_jinx = jinx; // массив индексов
+      this.f_jtyp = jtyp; // массив типов
+      this.f_Noia = Noia; // размер массивов
     }
 
     /**
-     * Изготовить лист по отчета по Рейтингу
+     * Изготовить лист отчета по Рейтингу
      * @param arrlst    массив данных
      * @param outDir    выходной каталог
      * @return          имя сформированного файла
@@ -37,12 +61,12 @@ class FormaXls {
     String makeList(ArrayList<String[]> arrlst, String outDir)
     {
         final int Data_base_row = 2;       // базовая строка, для вставки данных
-        final int Date_base_col = 1;       // базовая колонка для вставки данных
+        //final int Date_base_col = 1;       // базовая колонка для вставки данных
         //
         try {
             // получим дату рейтинга
             String[] sdat = arrlst.get(0);
-            String dat = sdat[9];   // ячейка с датой рейтинга
+            String dat = sdat[0];   // ячейка с датой рейтинга
             String[] ymd = dat.split("-");
             int yea = Integer.parseInt(ymd[0]);    // Год
             int mon = Integer.parseInt(ymd[1]);    // Месяц
@@ -73,7 +97,7 @@ class FormaXls {
                     row = wks.createRow(Data_base_row + cnt);
                 }
                 cnt++;
-                rst[0] = Integer.toString(cnt); // порядковый номер строки
+                rst[1] = Integer.toString(cnt); // порядковый номер строки
                 setRowVals(row, rst); // записать строку в Excel
             }
             // установить дату на листе
@@ -99,48 +123,54 @@ class FormaXls {
         }
     }
 
-    /**
-     * Записать значения в строку Excel из массива строк ответа БД
-     * и преобразованием некоторых позиций в целое
-     * @param row   строка Excel, куда делается запись
-     * @param rst   массив строк для записи
-     */
-    private void setRowVals(Row row, String[] rst)
-    {
-        final String intIndex = R.intIndex;     // "(0)(3)(6)(7)" список колонок с целыми числами
-        final String dblIndex = R.dblIndex;     //"(5)" список колонок с действительными числами
-        final String outIndex = R.outIndex;     // список колонок на выходе "(0)(1)(2)(3)(4)(5)(6)(7)(8)"
-        //
-        int iout = 0;
-        for(int i = 0; i < rst.length; i++) {
-            // если колонка не на выход, то ее пропускаем
-            if(!outIndex.contains("("+i+")")) continue;
-            String r = rst[i];
-            // колонка на выход
-            if(intIndex.contains("("+i+")")) {
-                // числовая колонка
-                try {
-                    int v = Integer.parseInt(r); // числовое представление
-                    setCellVal(row, iout, v);
-                } catch (Exception e) {
-                    System.err.println("Ошибка преобразования целого числа: " + r + " - " + e.getMessage());
-                }
-            }else if(dblIndex.contains("("+i+")")) {
-                // действительная колонка
-                try {
-                    double v = Double.parseDouble(r); // числовое представление
-                    setCellVal(row, iout, v);
-                } catch (Exception e) {
-                    System.err.println("Ошибка преобразования действительного числа: " + r + " - " + e.getMessage());
-                }
-            } else {
-                setCellVal(row, iout, r);
-            }
-            iout++;
-        }
-    }
+  /**
+   * Записать значения в строку Excel из массива строк ответа БД
+   * и преобразование некоторых позиций в целое или действительное число, в
+   * соответствии с шаблоном
+   * @param row   строка Excel, куда делается запись
+   * @param rst   массив данных строки для записи
+   */
+  private void setRowVals(Row row, String[] rst)
+  {
+    final int Nrst = rst.length;
+    for(int ixls = 0; ixls < this.f_Noia; ixls++)  {
+      // ixls - колонка в Excel
+      int j = f_jinx[ixls];  // индекс в шаблоне (индекс в картеже из БД)
+      if( j < 0  ||  j >= Nrst ) continue;
+      // есть число - работаем дальше
+      String r = rst[j];
+      // индекс в картеже допустимый
+      switch (this.f_jtyp[ixls]) {
+        case 'i':
+          // целочисленная колонка
+          try {
+            int v = Integer.parseInt(r); // числовое представление
+            setCellVal(row, ixls, v);
+          } catch (Exception e) {
+            System.err.println("Ошибка преобразования целого числа: " + r + " - " + e.getMessage());
+          }
+          break;
 
-    /**
+        case 'f':
+        case 'd':
+          // действительная колонка
+          try {
+            double v = Double.parseDouble(r); // числовое представление
+            setCellVal(row, ixls, v);
+          } catch (Exception e) {
+            System.err.println("Ошибка преобразования действительного числа: " + r + " - " + e.getMessage());
+          }
+          break;
+
+        default:
+          setCellVal(row, ixls, r);
+          break;
+      }
+    }
+  }
+
+
+  /**
      * Установить действительное числовое значение ячейки в заданной строке таблицы
      * @param row   строка
      * @param col   номер колонки

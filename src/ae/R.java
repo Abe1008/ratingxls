@@ -26,21 +26,20 @@ import java.util.Properties;
  * 01.06.23  номера колонок задать в properties
  * 21.12.23  данные о рейтинге берем с web-страницы
  * 22.12.23  при ошибке чтения web-страницы возвращает статус
+ * 22.12.23  умный шаблон соответствия колонок в Excel полям данных из БД (web-страницы)
  *
  */
 
 public class R {
-    public static String Ver = "Ver. 1.2"; // номер версии
+    public static String Ver = "Ver. 2.1"; // номер версии
     
     final static String sep = System.getProperty("file.separator"); // разделитель имени каталогов
 
     final static String fileNameExcel = "rating.xls";  // имя файла Excel
 
-    static String   intIndex = "(0)(3)(6)(7)";      // список колонок в Excel с целыми числами
-    static String   dblIndex = "(5)";               // список колонок с действительнымии числами
-    static String   outIndex = "(0)(1)(2)(3)(4)(5)(6)(7)(8)";    // список колонок на выходе
-        static String   XRating = _r.xrating;           // адрес web-страницы по-умолчанию
-    static int      TimeOut = 180000;         // тайм-аут ожидания ответа сервера (мс)
+    static String   OutIndex = "1i; 2; 3; 4i; 5; 6f; 7i; 8i; 9";    // список колонок в Excel
+    static String   XRating = _r.xrating;           // адрес web-страницы по-умолчанию
+    static int      TimeOut = 180000;               // тайм-аут ожидания ответа сервера (мс)
 
     static String   workDir = System.getProperty("java.io.tmpdir", ".");
 
@@ -51,10 +50,8 @@ public class R {
         Properties props = new Properties();
         try {
             props.load(R.class.getResourceAsStream("res/default.properties"));
-            // колонки с числами
-            intIndex = r2s(props, "intIndex", intIndex);
-            dblIndex = r2s(props, "dblIndex", dblIndex);
-            outIndex = r2s(props, "outIndex", outIndex);
+            // шаблон колонок с числами
+            OutIndex = r2s(props, "OutIndex", OutIndex);
             //
         } catch (IOException e) {
             e.printStackTrace();
