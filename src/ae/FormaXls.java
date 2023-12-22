@@ -44,17 +44,17 @@ class FormaXls {
             String[] sdat = arrlst.get(0);
             String dat = sdat[9];   // ячейка с датой рейтинга
             String[] ymd = dat.split("-");
-            int yea = Integer.parseInt(ymd[0]);    //Год
-            int mon = Integer.parseInt(ymd[1]);    //Месяц
-            int day = Integer.parseInt(ymd[2]);    //День
+            int yea = Integer.parseInt(ymd[0]);    // Год
+            int mon = Integer.parseInt(ymd[1]);    // Месяц
+            int day = Integer.parseInt(ymd[2]);    // День
             //
             String resname = "res/" + R.fileNameExcel;
             String s = String.format("%04d%02d%02d_", yea, mon, day);
             String fileName = outDir + R.sep + s + R.fileNameExcel;
             R r = new R();
             if(!r.writeRes2File(resname, fileName)) {
-                System.out.println("?ERROR-Can't write file: " + fileName);
-                return null;
+                // System.out.println("?-ERROR-Can't write file: " + fileName);
+                System.exit(3);
             }
             //
             FileInputStream inp = new FileInputStream(fileName);
@@ -66,26 +66,18 @@ class FormaXls {
             // получим первый лист
             HSSFSheet wks = wb.getSheetAt(0); //Access the worksheet, so that we can update / modify it.
             // заполним лист данными за требуемую дату
-
-            String strDat1 = String.format("%04d-%02d-%02d", 2023, 12, 21); // дата рейтинга
-            //
             int cnt = 0; // кол-во записанных строк
             for(String[] rst: arrlst) {
                 Row row = wks.getRow(Data_base_row + cnt);
                 if(row == null) {
                     row = wks.createRow(Data_base_row + cnt);
                 }
-                // преобразовать формат даты на Java
-//                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//                LocalDateTime dt = LocalDateTime.parse(sDat, format);
-//                String sDatO = dt.format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
                 cnt++;
                 rst[0] = Integer.toString(cnt); // порядковый номер строки
                 setRowVals(row, rst); // записать строку в Excel
             }
-            //
             // установить дату на листе
-            strDat1 =String.format("%02d.%02d.%04d", day, mon, yea);
+            String strDat1 =String.format("%02d.%02d.%04d", day, mon, yea); // дата рейтинга
             // ячейка даты
             Row row = wks.getRow(0);
             setCellVal(row, 2, strDat1);
@@ -131,7 +123,7 @@ class FormaXls {
                     int v = Integer.parseInt(r); // числовое представление
                     setCellVal(row, iout, v);
                 } catch (Exception e) {
-                    System.err.println("Ошибка преобразования числа: " + r + " - " + e.getMessage());
+                    System.err.println("Ошибка преобразования целого числа: " + r + " - " + e.getMessage());
                 }
             }else if(dblIndex.contains("("+i+")")) {
                 // действительная колонка
@@ -139,7 +131,7 @@ class FormaXls {
                     double v = Double.parseDouble(r); // числовое представление
                     setCellVal(row, iout, v);
                 } catch (Exception e) {
-                    System.err.println("Ошибка преобразования числа: " + r + " - " + e.getMessage());
+                    System.err.println("Ошибка преобразования действительного числа: " + r + " - " + e.getMessage());
                 }
             } else {
                 setCellVal(row, iout, r);

@@ -5,6 +5,11 @@
  */
 /*
  * Чтение данных рейтинга из web-страницы и формирование Excel файла.
+ * Код ошибки приложения:
+ *  1 - ошибка чтения web-страницы
+ *  2 - вывод хелпа
+ *  3 - невозможно записать выходной файл
+ *
  */
 
 package ae;
@@ -53,7 +58,7 @@ public class Main {
         String txt = conth.getContent(webpage); // загрузим
         if (txt == null) {
             System.out.println("Не могу загрузить страницу: " + webpage);
-            return;
+            System.exit(1);
         }
 
         // будем считывать csv файл с рейтингом
@@ -75,23 +80,9 @@ public class Main {
         }
         System.out.println("Прочитано строк: " + cnt);
 
-//        ArrayList<String[]> result = new ArrayList<>();
-//
-//
-//        // вчерашняя дата
-//        final LocalDateTime dt = LocalDateTime.now().minusHours(24);
-//        int d = dt.getDayOfMonth();
-//        int m = dt.getMonthValue();
-//        int y = dt.getYear();
-//        String sdat = String.format("%02d.%02d.%04d",d,m,y);
-//        //
-//        System.out.println("Рейтинг на "+ sdat);
-//
-//        //
-//        // создадим объект для формирования отчета Excel
         FormaXls f = new FormaXls();
         String outFile = f.makeList(arrlst, outdir);
-        System.out.println("записан файл: " + outFile);
+        System.out.println("output file: " + outFile);
     }
 
     private final static String HelpMessage =

@@ -25,11 +25,12 @@ import java.util.Properties;
  * 31.05.23  изменил формат вывода в Excel добавил название региона, а номер региона придвинул к ИНН
  * 01.06.23  номера колонок задать в properties
  * 21.12.23  данные о рейтинге берем с web-страницы
+ * 22.12.23  при ошибке чтения web-страницы возвращает статус
  *
  */
 
 public class R {
-    public static String Ver = "Ver. 1.1"; // номер версии
+    public static String Ver = "Ver. 1.2"; // номер версии
     
     final static String sep = System.getProperty("file.separator"); // разделитель имени каталогов
 
@@ -77,56 +78,56 @@ public class R {
         return str;
     }
 
-    /**
-     * Выдать числовое (long) значение из файла свойств, либо, если там
-     * нет такого свойства, вернуть значение по-умолчанию
-     * @param p                     свойства
-     * @param NameProp              имя свойства
-     * @param lngResourceDefault    значение по-умолчанию
-     * @return  значение свойства, а если его нет, то значение по-умолчанию
-     */
-    static private long r2s(Properties p, String NameProp, long lngResourceDefault)
-    {
-        String str = p.getProperty(NameProp);
-        if(str == null) {
-            str = String.valueOf(lngResourceDefault);
-        }
-        return Long.parseLong(str);
-    }
+//    /**
+//     * Выдать числовое (long) значение из файла свойств, либо, если там
+//     * нет такого свойства, вернуть значение по-умолчанию
+//     * @param p                     свойства
+//     * @param NameProp              имя свойства
+//     * @param lngResourceDefault    значение по-умолчанию
+//     * @return  значение свойства, а если его нет, то значение по-умолчанию
+//     */
+//    static private long r2s(Properties p, String NameProp, long lngResourceDefault)
+//    {
+//        String str = p.getProperty(NameProp);
+//        if(str == null) {
+//            str = String.valueOf(lngResourceDefault);
+//        }
+//        return Long.parseLong(str);
+//    }
 
-    /**
-     * Выдать числовое (int) значение из файла свойств, либо, если там
-     * нет такого свойства, вернуть значение по-умолчанию
-     * @param p                     свойства
-     * @param NameProp              имя свойства
-     * @param intResourceDefault    значение по-умолчанию
-     * @return  значение свойства, а если его нет, то значение по-умолчанию
-     */
-    private int r2s(Properties p, String NameProp, int intResourceDefault)
-    {
-        String str = p.getProperty(NameProp);
-        if(str == null) {
-            str = String.valueOf(intResourceDefault);
-        }
-        return Integer.parseInt(str);
-    }
+//    /**
+//     * Выдать числовое (int) значение из файла свойств, либо, если там
+//     * нет такого свойства, вернуть значение по-умолчанию
+//     * @param p                     свойства
+//     * @param NameProp              имя свойства
+//     * @param intResourceDefault    значение по-умолчанию
+//     * @return  значение свойства, а если его нет, то значение по-умолчанию
+//     */
+//    private int r2s(Properties p, String NameProp, int intResourceDefault)
+//    {
+//        String str = p.getProperty(NameProp);
+//        if(str == null) {
+//            str = String.valueOf(intResourceDefault);
+//        }
+//        return Integer.parseInt(str);
+//    }
 
-    /**
-     * прочитать ресурсный файл
-     * by novel  http://skipy-ru.livejournal.com/5343.html
-     * https://docs.oracle.com/javase/tutorial/deployment/webstart/retrievingResources.html
-     * @param nameRes - имя ресурсного файла
-     * @return - содержимое ресурсного файла
-     */
-    public String readRes(String nameRes)
-    {
-        String str = null;
-        ByteArrayOutputStream buf = readResB(nameRes);
-        if(buf != null) {
-            str = buf.toString();
-        }
-        return str;
-    }
+//    /**
+//     * прочитать ресурсный файл
+//     * by novel  http://skipy-ru.livejournal.com/5343.html
+//     * https://docs.oracle.com/javase/tutorial/deployment/webstart/retrievingResources.html
+//     * @param nameRes - имя ресурсного файла
+//     * @return - содержимое ресурсного файла
+//     */
+//    public String readRes(String nameRes)
+//    {
+//        String str = null;
+//        ByteArrayOutputStream buf = readResB(nameRes);
+//        if(buf != null) {
+//            str = buf.toString();
+//        }
+//        return str;
+//    }
 
     /**
      * Поместить ресурс в байтовый массив
@@ -135,7 +136,6 @@ public class R {
      */
     private ByteArrayOutputStream readResB(String nameRes)
     {
-        String str = null;
         try {
             // Get current classloader
             InputStream is = getClass().getResourceAsStream(nameRes);
@@ -158,26 +158,26 @@ public class R {
         return null;
     }
 
-    /**
-     * Записать в файл текст из строкт
-     * @param strTxt - строка текста
-     * @param fileName - имя файла
-     * @return      true - записано, false - ошибка
-     */
-    public boolean writeStr2File(String strTxt, String fileName)
-    {
-        File f = new File(fileName);
-        try {
-            // сформируем командный файл BAT
-            PrintWriter out = new PrintWriter(f);
-            out.write(strTxt);
-            out.close();
-        } catch(IOException ex) {
-            ex.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+//    /**
+//     * Записать в файл текст из строкт
+//     * @param strTxt - строка текста
+//     * @param fileName - имя файла
+//     * @return      true - записано, false - ошибка
+//     */
+//    public boolean writeStr2File(String strTxt, String fileName)
+//    {
+//        File f = new File(fileName);
+//        try {
+//            // сформируем командный файл BAT
+//            PrintWriter out = new PrintWriter(f);
+//            out.write(strTxt);
+//            out.close();
+//        } catch(IOException ex) {
+//            ex.printStackTrace();
+//            return false;
+//        }
+//        return true;
+//    }
 
     /**
      *  Записать в файл ресурсный файл
@@ -196,45 +196,46 @@ public class R {
                 fout.close();
                 b = true;
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("?-Error write resource - " + e.getMessage());
+                return false;
             }
         }
         return b;
     }
     
-    /**
-     * Загружает текстовый ресурс в заданной кодировке
-     * @param name      имя ресурса
-     * @param code_page кодировка, например "Cp1251"
-     * @return          строка ресурса
-     */
-    public String getText(String name, String code_page)
-    {
-        StringBuilder sb = new StringBuilder();
-        try {
-            InputStream is = this.getClass().getResourceAsStream(name);  // Имя ресурса
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, code_page));
-            String line;
-            while ((line = br.readLine()) !=null) {
-                sb.append(line);  sb.append("\n");
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return sb.toString();
-    }
+//    /**
+//     * Загружает текстовый ресурс в заданной кодировке
+//     * @param name      имя ресурса
+//     * @param code_page кодировка, например "Cp1251"
+//     * @return          строка ресурса
+//     */
+//    public String getText(String name, String code_page)
+//    {
+//        StringBuilder sb = new StringBuilder();
+//        try {
+//            InputStream is = this.getClass().getResourceAsStream(name);  // Имя ресурса
+//            BufferedReader br = new BufferedReader(new InputStreamReader(is, code_page));
+//            String line;
+//            while ((line = br.readLine()) !=null) {
+//                sb.append(line);  sb.append("\n");
+//            }
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
+//        return sb.toString();
+//    }
     
-    /**
-     * Пауза выполнения программы (потока)
-     * @param msec - задержка, мсек
-     */
-    public static void Sleep(long msec)
-    {
-        try {
-            Thread.sleep(msec);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    /**
+//     * Пауза выполнения программы (потока)
+//     * @param msec - задержка, мсек
+//     */
+//    public static void Sleep(long msec)
+//    {
+//        try {
+//            Thread.sleep(msec);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 } // end of class
