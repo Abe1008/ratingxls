@@ -2,6 +2,7 @@
  * Copyright (c) 2017. Aleksey Eremin
  * 10.02.17 14:41
  * 04.09.19
+ * 24.12.23
  *
  * Формирование листа Excel по данным из БД
  *
@@ -20,8 +21,8 @@ import java.util.ArrayList;
 
 class FormaXls {
 
-  final int[]   f_jinx;  // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
-  final char[]  f_jtyp;  // типы колонок в Excel
+  final int[]   f_jInx;  // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
+  final char[]  f_jTyp;  // типы колонок в Excel
   final int     f_Noia; // размер массива шаблона
 
     /**
@@ -31,12 +32,17 @@ class FormaXls {
     FormaXls()
     {
       // подготовка заданного шаблона преобразования в порядковые массивы индексов и типов колонок
-      String outIndex = R.OutIndex.replaceAll(" ",""); // шаблон колонок "i7;1;2;i3;4;f5;i7;i7;8"
-      String[] oia = outIndex.split(";");
-      int Noia = oia.length;
-      int[]  jinx = new int[Noia];   // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
-      char[] jtyp = new char[Noia];  // типы колонок в Excel
-      for(int ixls = 0; ixls < Noia; ixls++)  {
+      // Шаблон - строка таблицы Excel в порядке следования колонок, колонки разделяются '|'.
+      // В колонке шаблона указывается порядковый номер поля БД (нумерация с 0), которое вставляется в
+      // данную колонку Excel.
+      // Если номер не указан, то данная колонка не заполняется.
+      // Если у номера указана буква i, то это целочисленная колонка, если f - действительное число.
+      // шаблон колонок "1i | 2 | 3 | 4i | 5 | 6f | 7i | 8i |9"
+      final String[] oia = R.OutIndex.replaceAll(" ","").split("[|;]");
+      final int noir = oia.length;
+      int[]  jinx = new int[noir];   // индексы БД, соответствующие колонке в Excel (-1 нет соответствия)
+      char[] jtyp = new char[noir];  // типы колонок в Excel
+      for(int ixls = 0; ixls < noir; ixls++)  {
         // ixls - колонка в Excel
         String si = oia[ixls];
         String mi = si.replaceAll("[^0-9]", "");
@@ -44,12 +50,12 @@ class FormaXls {
         if(mi.length() < 1) mi = "-1";  // неподходящее число заменим на -1 тюею игнор и пропуск колонки
         if(mt.length() < 1) mt = "-";   // не целое и не действительное
         jinx[ixls] = Integer.parseInt(mi);  // индекс в шаблоне (индекс в картеже из БД)
-        jtyp[ixls] = mt.charAt(0);          // тип колонки (i - целое, f|d - действительное)
+        jtyp[ixls] = mt.charAt(0);          // тип колонки (i - целое, f - действительное)
       }
       // запомним результат работы
-      this.f_jinx = jinx; // массив индексов
-      this.f_jtyp = jtyp; // массив типов
-      this.f_Noia = Noia; // размер массивов
+      this.f_jInx = jinx; // массив индексов
+      this.f_jTyp = jtyp; // массив типов
+      this.f_Noia = noir; // размер массивов
     }
 
     /**
@@ -132,15 +138,15 @@ class FormaXls {
    */
   private void setRowVals(Row row, String[] rst)
   {
-    final int Nrst = rst.length;
+    final int nrst = rst.length;
     for(int ixls = 0; ixls < this.f_Noia; ixls++)  {
       // ixls - колонка в Excel
-      int j = f_jinx[ixls];  // индекс в шаблоне (индекс в картеже из БД)
-      if( j < 0  ||  j >= Nrst ) continue;
+      int j = f_jInx[ixls];  // индекс в шаблоне (индекс в картеже из БД)
+      if( j < 0  ||  j >= nrst ) continue;
       // есть число - работаем дальше
       String r = rst[j];
       // индекс в картеже допустимый
-      switch (this.f_jtyp[ixls]) {
+      switch (this.f_jTyp[ixls]) {
         case 'i':
           // целочисленная колонка
           try {
@@ -152,7 +158,6 @@ class FormaXls {
           break;
 
         case 'f':
-        case 'd':
           // действительная колонка
           try {
             double v = Double.parseDouble(r); // числовое представление
@@ -168,7 +173,6 @@ class FormaXls {
       }
     }
   }
-
 
   /**
      * Установить действительное числовое значение ячейки в заданной строке таблицы

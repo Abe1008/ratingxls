@@ -37,7 +37,7 @@ public class R {
 
     final static String fileNameExcel = "rating.xls";  // имя файла Excel
 
-    static String   OutIndex = "1i; 2; 3; 4i; 5; 6f; 7i; 8i; 9";    // список колонок в Excel
+    static String   OutIndex = "1i | 2 | 3 | 4i | 5 | 6f | 7i | 8i | 9";    // список колонок в Excel
     static String   XRating = _r.xrating;           // адрес web-страницы по-умолчанию
     static int      TimeOut = 180000;               // тайм-аут ожидания ответа сервера (мс)
 
