@@ -1,0 +1,62 @@
+#!/bin/bash
+# 2023 (C) A.Eremin
+# читаем рейтинг с web-портала и посылаем на почту
+# 22.12.2023
+#
+
+ADR=revizor_pfo@grfc.ru
+SUBJ="Рейтинг нарушителей АС Ревизор"
+#ADR=o52225@ya.ru
+
+MYDIR=$(dirname `realpath "$0"`)
+
+# имя портала WEB
+WEB=abdra.ru
+
+# архив с таблицами БД
+WEBURL=http://gmir:rere.v,f@$WEB/gm/DOC/xrating.php
+
+bn=`basename $0`
+lck=/tmp/$bn.lck
+
+if [ -f $lck ] 
+then
+    echo Another unit work
+    nl=`ps -h -p $(cat $lck) | grep $bn | wc -l`
+    if [ $nl = 0 ]
+    then
+      echo I dont see process
+      rm $lck 
+    fi
+    exit
+fi
+echo $$  >$lck
+
+s=`date +%d%H%M`
+TMPD=`mktemp -d /var/tmp/mr$s.XXXX` || exit 1
+
+cd $TMPD
+
+# отправить рейтинг
+java -jar $MYDIR/as_ratingxls.jar -w $WEBURL -o $TMPD
+
+if [ $? = 0 ] ; then
+  foo=`ls -1 *.xls`
+  dy=${foo:0:4}
+  dm=${foo:4:2}
+  da=${foo:6:2}
+  r=${foo/rating.xls/рейтинг.xls}
+  cp $foo $r
+  # отправим почтой этот файл 
+  echo "Рейтинг операторов ПФО по нарушениям за $da.$dm.$dy. AVDS. " `date` | mutt -s "$SUBJ за $da.$dm.$dy" -a $r -- $ADR
+else
+  
+  d=`date -d "yesterday 08:00" '+%d.%m.%Y' `
+  echo "Рейтинг операторов ПФО по нарушениям за $d пустой. AVDS. " `date` | mutt -s "$SUBJ за $d"  -- $ADR
+  
+fi
+
+cd /tmp
+
+rm -f $lck
+rm -f -r $TMPD

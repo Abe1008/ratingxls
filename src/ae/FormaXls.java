@@ -16,7 +16,6 @@ import org.apache.poi.ss.usermodel.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 class FormaXls {
@@ -123,7 +122,7 @@ class FormaXls {
             wb.write(fileOut);
             fileOut.close();
             return fileName;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
